@@ -134,6 +134,17 @@ resource "aws_s3_bucket_public_access_block" "findings" {
 
 # ── Secrets Manager ──────────────────────────────────────────
 
+resource "aws_secretsmanager_secret" "slack_webhook" {
+  name        = "${var.project}/slack-webhook/${var.env}"
+  description = "Slack incoming webhook URL for CVE alerts"
+  tags        = local.tags
+}
+
+resource "aws_secretsmanager_secret_version" "slack_webhook" {
+  secret_id     = aws_secretsmanager_secret.slack_webhook.id
+  secret_string = var.slack_webhook_url
+}
+
 resource "aws_secretsmanager_secret" "jwt_secret" {
   name        = "${var.project}/jwt-secret/${var.env}"
   description = "JWT signing key for registry service"
@@ -187,4 +198,8 @@ output "s3_bucket_name" {
 
 output "account_id" {
   value = data.aws_caller_identity.current.account_id
+}
+
+output "slack_webhook_secret_arn" {
+  value = aws_secretsmanager_secret.slack_webhook.arn
 }
