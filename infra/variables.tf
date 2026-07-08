@@ -26,6 +26,6 @@ variable "jwt_secret" {
 
 variable "slack_webhook_url" {
   description = "Slack incoming webhook URL for CVE alerts"
-  default     = "https://hooks.slack.com/services/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"
+  type        = string 
   sensitive   = true
 }

@@ -26,8 +26,8 @@ services:
       AWS_REGION: eu-west-1
       STACKS_TABLE: vuln-stacks-dev
       FINDINGS_TABLE: vuln-findings-dev
-      SQS_QUEUE_URL: https://sqs.eu-west-1.amazonaws.com/ACCOUNTID/vuln-findings-dev
-      S3_BUCKET: vuln-alert-findings-ACCOUNTID
+      SQS_QUEUE_URL: https://sqs.eu-west-1.amazonaws.com/${account_id}/vuln-findings-dev
+      S3_BUCKET: vuln-alert-findings-${account_id}
       AWS_PROFILE: default
     volumes:
       - ~/.aws:/root/.aws:ro
@@ -38,9 +38,9 @@ services:
     build: ./services/alert-service
     environment:
       AWS_REGION: eu-west-1
-      SQS_QUEUE_URL: https://sqs.eu-west-1.amazonaws.com/ACCOUNTID/vuln-findings-dev
-      SNS_TOPIC_ARN: arn:aws:sns:eu-west-1:ACCOUNTID:vuln-alerts-dev
-      SLACK_WEBHOOK_URL: ""
+      SQS_QUEUE_URL: https://sqs.eu-west-1.amazonaws.com/${account_id}/vuln-findings-dev
+      SNS_TOPIC_ARN: arn:aws:sns:eu-west-1:${account_id}:vuln-alerts-dev
+      SLACK_WEBHOOK_URL: "https://hooks.slack.com/services/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"
       AWS_PROFILE: default
     volumes:
       - ~/.aws:/root/.aws:ro
