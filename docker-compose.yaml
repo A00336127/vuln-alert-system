@@ -38,7 +38,7 @@ services:
     build: ./services/alert-service
     environment:
       AWS_REGION: eu-west-1
-      SQS_QUEUE_URL: https://sqs.eu-west-1.amazonaws.com/${AWS_ACCOUNT_ID}/vuln-findings-dev
+      SQS_QUEUE_URL: https://sqs.eu-west-1.amazonaws.com/${AWS_ACCOUNT_ID}/vuln-alert-findings-dev
       SNS_TOPIC_ARN: arn:aws:sns:eu-west-1:${AWS_ACCOUNT_ID}:vuln-alerts-dev
       SLACK_WEBHOOK_URL: ${SLACK_WEBHOOK_URL}
     volumes:
