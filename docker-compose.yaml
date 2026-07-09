@@ -8,8 +8,8 @@ services:
       - "8001:8000"
     environment:
       AWS_REGION: eu-west-1
-      STACKS_TABLE: vuln-stacks-dev
-      USERS_TABLE: vuln-users-dev
+      STACKS_TABLE: vuln-alert-stacks-dev
+      USERS_TABLE: vuln-alert-users-dev
       JWT_SECRET: dev-secret-change-in-production
       AWS_PROFILE: default
     volumes:
@@ -24,9 +24,9 @@ services:
     build: ./services/scanner-service
     environment:
       AWS_REGION: eu-west-1
-      STACKS_TABLE: vuln-stacks-dev
-      FINDINGS_TABLE: vuln-findings-dev
-      SQS_QUEUE_URL: https://sqs.eu-west-1.amazonaws.com/${AWS_ACCOUNT_ID}/vuln-findings-dev
+      STACKS_TABLE: vuln-alert-stacks-dev
+      FINDINGS_TABLE: vuln-alert-findings-dev
+      SQS_QUEUE_URL: https://sqs.eu-west-1.amazonaws.com/${AWS_ACCOUNT_ID}/vuln-alert-findings-dev
       S3_BUCKET: vuln-alert-findings-${AWS_ACCOUNT_ID}
       AWS_PROFILE: default
     volumes:
