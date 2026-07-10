@@ -2,6 +2,7 @@
 *.tfstate
 *.tfstate.backup
 .terraform.lock.hcl
+terraform.tfvars
 __pycache__/
 *.pyc
 .pytest_cache/
