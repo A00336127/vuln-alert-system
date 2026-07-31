@@ -48,12 +48,6 @@ OSV_API    = "https://api.osv.dev/v1"
 
 def query_osv(package: str, version: str, ecosystem: str) -> list:
     """
-    Call OSV.dev API to get all known vulnerabilities for a specific
-    package version.
-
-    Note: This makes an outbound HTTP call to api.osv.dev.
-    Falco monitors this call and network policies restrict outbound
-    access to this domain only — demonstrated in the evaluation chapter.
     """
     try:
         response = requests.post(

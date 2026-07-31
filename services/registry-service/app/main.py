@@ -35,8 +35,7 @@ stacks_table = dynamodb.Table(os.environ["STACKS_TABLE"])
 users_table  = dynamodb.Table(os.environ["USERS_TABLE"])
 
 # JWT secret is pulled from environment variable.
-# In production this is injected by External Secrets Operator
-# which syncs from AWS Secrets Manager into a Kubernetes secret.
+
 JWT_SECRET = os.environ["JWT_SECRET"]
 
 
@@ -63,8 +62,7 @@ class RegisterRequest(BaseModel):
 def hash_password(password: str) -> str:
     """
     SHA-256 password hashing.
-    Note: In a production system bcrypt would be more appropriate,
-    but SHA-256 is sufficient for this research prototype.
+    
     """
     return hashlib.sha256(password.encode()).hexdigest()
 

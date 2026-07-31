@@ -29,3 +29,7 @@ variable "slack_webhook_url" {
   type        = string 
   sensitive   = true
 }
+
+variable "eks_cluster_name" {
+  default = "vuln-alert-eks"
+}

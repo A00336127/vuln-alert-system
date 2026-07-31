@@ -9,7 +9,23 @@ provider "aws" {
   region = var.aws_region
 }
 
-# ── DynamoDB Tables ──────────────────────────────────────────
+module "vpc" {
+  source     = "./modules/vpc"
+  project    = var.project
+  env        = var.env
+  aws_region = var.aws_region
+}
+
+module "eks" {
+  source             = "./modules/eks"
+  project            = var.project
+  env                = var.env
+  eks_cluster_name   = var.eks_cluster_name
+  vpc_id             = module.vpc.vpc_id
+  private_subnet_ids = module.vpc.private_subnet_ids
+}
+
+# DynamoDB Tables 
 
 resource "aws_dynamodb_table" "stacks" {
   name         = "${var.project}-stacks-${var.env}"
@@ -67,7 +83,7 @@ resource "aws_dynamodb_table" "users" {
   tags = local.tags
 }
 
-# ── SQS Queue + Dead Letter Queue ────────────────────────────
+# SQS Queue + Dead Letter Queue
 
 resource "aws_sqs_queue" "findings_dlq" {
   name                      = "${var.project}-findings-dlq-${var.env}"
