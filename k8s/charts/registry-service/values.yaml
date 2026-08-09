@@ -1,0 +1,16 @@
+image:
+  repository: 129373676499.dkr.ecr.eu-west-1.amazonaws.com/registry-service
+  tag: latest
+
+namespace: vuln-alert
+port: 8000
+replicas: 1
+
+env:
+  AWS_REGION: eu-west-1
+  STACKS_TABLE: vuln-alert-stacks-dev
+  USERS_TABLE: vuln-alert-users-dev
+
+resources:
+  limits:   { cpu: "500m", memory: "256Mi" }
+  requests: { cpu: "100m", memory: "128Mi" }

@@ -1,0 +1,17 @@
+image:
+  repository: 129373676499.dkr.ecr.eu-west-1.amazonaws.com/scanner-service
+  tag: latest
+
+namespace: vuln-alert
+replicas: 1
+
+env:
+  AWS_REGION: eu-west-1
+  STACKS_TABLE: vuln-alert-stacks-dev
+  FINDINGS_TABLE: vuln-alert-findings-dev
+  SQS_QUEUE_URL: https://sqs.eu-west-1.amazonaws.com/129373676499/vuln-alert-findings-dev
+  S3_BUCKET: vuln-alert-findings-129373676499
+
+resources:
+  limits:   { cpu: "500m", memory: "256Mi" }
+  requests: { cpu: "100m", memory: "128Mi" }

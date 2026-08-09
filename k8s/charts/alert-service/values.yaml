@@ -1,0 +1,15 @@
+image:
+  repository: 129373676499.dkr.ecr.eu-west-1.amazonaws.com/alert-service
+  tag: latest
+
+namespace: vuln-alert
+replicas: 1
+
+env:
+  AWS_REGION: eu-west-1
+  SQS_QUEUE_URL: https://sqs.eu-west-1.amazonaws.com/129373676499/vuln-alert-findings-dev
+  SNS_TOPIC_ARN: arn:aws:sns:eu-west-1:129373676499:vuln-alert-alerts-dev
+
+resources:
+  limits:   { cpu: "500m", memory: "256Mi" }
+  requests: { cpu: "100m", memory: "128Mi" }

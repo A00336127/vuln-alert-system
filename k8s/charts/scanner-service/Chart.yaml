@@ -1,0 +1,5 @@
+apiVersion: v2
+name: scanner-service
+description: Scanner service for the vuln-alert-system
+version: 0.1.0
+appVersion: "1.0.0"
