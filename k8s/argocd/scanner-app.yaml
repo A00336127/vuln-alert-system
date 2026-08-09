@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: scanner-service
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/A00336127/vuln-alert-system
+    targetRevision: main
+    path: k8s/charts/scanner-service
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: vuln-alert
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
