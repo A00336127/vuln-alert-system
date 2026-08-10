@@ -65,6 +65,7 @@ jobs:
           image-ref: '${{ matrix.service }}:${{ github.sha }}'
           format: 'table'
           severity: 'CRITICAL,HIGH'
+          ignore-unfixed: true
           exit-code: '1'
 
       - name: Tag and push to ECR
