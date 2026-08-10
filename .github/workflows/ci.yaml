@@ -59,14 +59,27 @@ jobs:
         run: |
           docker build -t ${{ matrix.service }}:${{ github.sha }} services/${{ matrix.service }}/
 
+      # - name: Scan image with Trivy
+      #   uses: aquasecurity/trivy-action@master
+      #   with:
+      #     image-ref: '${{ matrix.service }}:${{ github.sha }}'
+      #     format: 'table'
+      #     severity: 'CRITICAL,HIGH'
+      #     ignore-unfixed: true
+      #     exit-code: '1'
+
+      - name: Install Trivy
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+
       - name: Scan image with Trivy
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: '${{ matrix.service }}:${{ github.sha }}'
-          format: 'table'
-          severity: 'CRITICAL,HIGH'
-          ignore-unfixed: true
-          exit-code: '1'
+        run: |
+          trivy image 
+            --severity CRITICAL,HIGH 
+            --ignore-unfixed 
+            --exit-code 1 
+            --format table 
+            ${{ matrix.service }}:${{ github.sha }}
 
       - name: Tag and push to ECR
         if: github.ref == 'refs/heads/main'
