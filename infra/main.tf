@@ -16,6 +16,39 @@ module "vpc" {
   aws_region = var.aws_region
 }
 
+resource "aws_ecr_repository" "registry_service" {
+  name                 = "registry-service"
+  image_tag_mutability = "MUTABLE"
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+
+  tags = local.tags
+}
+
+resource "aws_ecr_repository" "scanner_service" {
+  name                 = "scanner-service"
+  image_tag_mutability = "MUTABLE"
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+
+  tags = local.tags
+}
+
+resource "aws_ecr_repository" "alert_service" {
+  name                 = "alert-service"
+  image_tag_mutability = "MUTABLE"
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+
+  tags = local.tags
+}
+
 module "eks" {
   source             = "./modules/eks"
   project            = var.project
@@ -218,4 +251,16 @@ output "account_id" {
 
 output "slack_webhook_secret_arn" {
   value = aws_secretsmanager_secret.slack_webhook.arn
+}
+
+output "registry_service_ecr_url" {
+  value = aws_ecr_repository.registry_service.repository_url
+}
+
+output "scanner_service_ecr_url" {
+  value = aws_ecr_repository.scanner_service.repository_url
+}
+
+output "alert_service_ecr_url" {
+  value = aws_ecr_repository.alert_service.repository_url
 }
