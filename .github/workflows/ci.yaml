@@ -66,10 +66,10 @@ jobs:
       - name: Scan image with Trivy
         run: |
           trivy image \
-            --severity CRITICAL,HIGH \
-            --ignore-unfixed \
-            --exit-code 1 \
-            --format table \
+          --severity CRITICAL,HIGH \
+          --ignore-unfixed \
+          --exit-code 1 \
+          --format table \
             ${{ matrix.service }}:${{ github.sha }}
 
       - name: Tag and push to ECR
