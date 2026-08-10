@@ -1,3 +1,96 @@
+# name: CI - Build, Scan, Push to ECR
+
+# on:
+#   push:
+#     branches: [main]
+#     paths:
+#       - 'services/**'
+#   pull_request:
+#     branches: [main]
+#     paths:
+#       - 'services/**'
+
+# env:
+#   AWS_REGION: eu-west-1
+#   ECR_REGISTRY: 129373676499.dkr.ecr.eu-west-1.amazonaws.com
+
+# jobs:
+#   build-scan-push:
+#     runs-on: ubuntu-latest
+#     strategy:
+#       matrix:
+#         service: [registry-service, scanner-service, alert-service]
+
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+
+#       - name: Set up Python
+#         uses: actions/setup-python@v5
+#         with:
+#           python-version: "3.12"
+
+#       - name: Install dependencies for scanning
+#         run: |
+#           pip install pip-audit bandit --break-system-packages
+
+#       - name: Run pip-audit (SCA — dependency vulnerabilities)
+#         run: |
+#           pip-audit -r services/${{ matrix.service }}/requirements.txt || true
+#         continue-on-error: true
+
+#       - name: Run Bandit (SAST — Python source code)
+#         run: |
+#           bandit -r services/${{ matrix.service }}/app/ -f txt || true
+#         continue-on-error: true
+
+#       - name: Configure AWS credentials
+#         uses: aws-actions/configure-aws-credentials@v4
+#         with:
+#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#           aws-region: ${{ env.AWS_REGION }}
+
+#       - name: Login to Amazon ECR
+#         id: ecr-login
+#         uses: aws-actions/amazon-ecr-login@v2
+
+#       - name: Build Docker image
+#         run: |
+#           docker build -t ${{ matrix.service }}:${{ github.sha }} services/${{ matrix.service }}/
+
+#       # - name: Scan image with Trivy
+#       #   uses: aquasecurity/trivy-action@master
+#       #   with:
+#       #     image-ref: '${{ matrix.service }}:${{ github.sha }}'
+#       #     format: 'table'
+#       #     severity: 'CRITICAL,HIGH'
+#       #     ignore-unfixed: true
+#       #     exit-code: '1'
+
+#       - name: Install Trivy
+#         run: |
+#           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+
+#       - name: Scan image with Trivy
+#         run: |
+#           trivy image 
+#             --severity CRITICAL,HIGH 
+#             --ignore-unfixed 
+#             --exit-code 1 
+#             --format table 
+#             ${{ matrix.service }}:${{ github.sha }}
+
+#       - name: Tag and push to ECR
+#         if: github.ref == 'refs/heads/main'
+#         run: |
+#           docker tag ${{ matrix.service }}:${{ github.sha }} \
+#             ${{ env.ECR_REGISTRY }}/${{ matrix.service }}:${{ github.sha }}
+#           docker tag ${{ matrix.service }}:${{ github.sha }} \
+#             ${{ env.ECR_REGISTRY }}/${{ matrix.service }}:latest
+#           docker push ${{ env.ECR_REGISTRY }}/${{ matrix.service }}:${{ github.sha }}
+#           docker push ${{ env.ECR_REGISTRY }}/${{ matrix.service }}:latest
+
 name: CI - Build, Scan, Push to ECR
 
 on:
@@ -59,27 +152,12 @@ jobs:
         run: |
           docker build -t ${{ matrix.service }}:${{ github.sha }} services/${{ matrix.service }}/
 
-      # - name: Scan image with Trivy
-      #   uses: aquasecurity/trivy-action@master
-      #   with:
-      #     image-ref: '${{ matrix.service }}:${{ github.sha }}'
-      #     format: 'table'
-      #     severity: 'CRITICAL,HIGH'
-      #     ignore-unfixed: true
-      #     exit-code: '1'
-
       - name: Install Trivy
         run: |
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
 
       - name: Scan image with Trivy
-        run: |
-          trivy image 
-            --severity CRITICAL,HIGH 
-            --ignore-unfixed 
-            --exit-code 1 
-            --format table 
-            ${{ matrix.service }}:${{ github.sha }}
+        run: trivy image --severity CRITICAL,HIGH --ignore-unfixed --exit-code 1 --format table ${{ matrix.service }}:${{ github.sha }}
 
       - name: Tag and push to ECR
         if: github.ref == 'refs/heads/main'
