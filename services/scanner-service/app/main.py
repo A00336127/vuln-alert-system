@@ -17,6 +17,8 @@ Student ID: A00336127
 MSc Software Design with Cloud Native Computing - TUS Athlone
 """
 
+from decimal import Decimal
+
 import boto3
 import requests
 import os
@@ -169,8 +171,8 @@ def get_epss_score(cve_id) -> dict:
         data = response.json().get("data", [])
         if data:
             return {
-                "epss_score":      float(data[0]["epss"]),
-                "epss_percentile": float(data[0]["percentile"])
+                "epss_score":      Decimal(data[0]["epss"]),
+                "epss_percentile": Decimal(data[0]["percentile"])
             }
     except requests.RequestException as e:
         logger.error(f"EPSS lookup failed for {cve_id}: {e}")
