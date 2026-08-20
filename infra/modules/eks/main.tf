@@ -13,11 +13,11 @@ module "eks" {
 
   eks_managed_node_groups = {
     default = {
-      instance_types = ["t3a.small"]
+      instance_types = ["t3.medium"]
        capacity_type  = "ON_DEMAND"
       min_size       = 1
       max_size       = 2
-      desired_size   = 1
+      desired_size   = 2
     }
   }
 
