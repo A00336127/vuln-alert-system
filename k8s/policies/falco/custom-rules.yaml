@@ -1,0 +1,62 @@
+- rule: Shell Spawned in Vuln-Alert Pod
+  desc: Detects execution of a shell inside any pod in the vuln-alert namespace
+  condition: >
+    spawned_process and
+    container and
+    k8s.ns.name = "vuln-alert" and
+    proc.name in (bash, sh, zsh, ash)
+  output: >
+    Shell spawned in vuln-alert pod
+    (user=%user.name container=%container.name pod=%k8s.pod.name
+    command=%proc.cmdline image=%container.image.repository)
+  priority: CRITICAL
+  tags: [vuln-alert, shell, mitre_execution]
+
+- rule: Unexpected Outbound Connection from Alert Service
+  desc: >
+    Alert service should only ever talk to AWS APIs and Slack.
+    Any other outbound destination is unexpected.
+  condition: >
+    outbound and
+    container and
+    k8s.ns.name = "vuln-alert" and
+    k8s.pod.name startswith "alert-service" and
+    not (fd.sip.name endswith "amazonaws.com" or fd.sip.name endswith "slack.com")
+  output: >
+    Unexpected outbound connection from alert-service
+    (pod=%k8s.pod.name destination=%fd.sip.name port=%fd.sport)
+  priority: WARNING
+  tags: [vuln-alert, network, mitre_exfiltration]
+
+- rule: Unexpected Outbound Connection from Scanner Service
+  desc: >
+    Scanner service should only talk to OSV.dev, FIRST.org (EPSS),
+    GitHub API, and AWS APIs.
+  condition: >
+    outbound and
+    container and
+    k8s.ns.name = "vuln-alert" and
+    k8s.pod.name startswith "scanner-service" and
+    not (fd.sip.name endswith "osv.dev" or
+         fd.sip.name endswith "first.org" or
+         fd.sip.name endswith "github.com" or
+         fd.sip.name endswith "githubusercontent.com" or
+         fd.sip.name endswith "amazonaws.com")
+  output: >
+    Unexpected outbound connection from scanner-service
+    (pod=%k8s.pod.name destination=%fd.sip.name port=%fd.sport)
+  priority: WARNING
+  tags: [vuln-alert, network, mitre_exfiltration]
+
+- rule: Sensitive File Read in Vuln-Alert Pod
+  desc: Detects reads of sensitive files that no service should ever access
+  condition: >
+    open_read and
+    container and
+    k8s.ns.name = "vuln-alert" and
+    fd.name in (/etc/shadow, /etc/passwd, /root/.aws/credentials, /root/.ssh/id_rsa)
+  output: >
+    Sensitive file read in vuln-alert pod
+    (pod=%k8s.pod.name file=%fd.name user=%user.name)
+  priority: CRITICAL
+  tags: [vuln-alert, filesystem, mitre_credential_access]
