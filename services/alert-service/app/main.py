@@ -80,6 +80,45 @@ Notification System running on AWS EKS.
     return {"subject": subject[:100], "body": body}
 
 
+# def format_slack_alert(finding: dict) -> dict:
+#     """Format a finding as a Slack message with colour coding by severity."""
+#     severity = finding.get("severity", "UNKNOWN")
+#     emoji    = SEVERITY_EMOJI.get(severity, "⚪")
+
+#     colour = {
+#         "CRITICAL": "#E24B4A",
+#         "HIGH":     "#EF9F27",
+#         "MEDIUM":   "#F5C518",
+#         "LOW":      "#1D9E75"
+#     }.get(severity, "#888888")
+
+#     return {
+#         "attachments": [{
+#             "color":  colour,
+#             "title":  (
+#                 f"{emoji} {severity}: {finding.get('vuln_id')} "
+#                 f"in {finding['package']}=={finding['version']}"
+#             ),
+#             "text":   finding.get("summary", ""),
+#             "fields": [
+#                 {
+#                     "title": "Fix",
+#                     "value": (
+#                         f"`pip install {finding['package']}=="
+#                         f"{finding.get('fix_version', 'latest')}`"
+#                     ),
+#                     "short": True
+#                 },
+#                 {
+#                     "title": "Detected",
+#                     "value": finding.get("detected_at", "Unknown"),
+#                     "short": True
+#                 }
+#             ],
+#             "footer": "Vuln Alert System | AWS EKS"
+#         }]
+#     }
+
 def format_slack_alert(finding: dict) -> dict:
     """Format a finding as a Slack message with colour coding by severity."""
     severity = finding.get("severity", "UNKNOWN")
@@ -92,6 +131,50 @@ def format_slack_alert(finding: dict) -> dict:
         "LOW":      "#1D9E75"
     }.get(severity, "#888888")
 
+    fields = [
+        {
+            "title": "Fix",
+            "value": (
+                f"`pip install {finding['package']}=="
+                f"{finding.get('fix_version', 'latest')}`"
+            ),
+            "short": True
+        },
+        {
+            "title": "Detected",
+            "value": finding.get("detected_at", "Unknown"),
+            "short": True
+        }
+    ]
+
+    # EPSS score — only include if it was actually captured
+    epss_score = finding.get("epss_score")
+    if epss_score is not None:
+        epss_pct = f"{float(epss_score) * 100:.1f}%"
+        epss_percentile = finding.get("epss_percentile")
+        percentile_text = (
+            f" (top {(1 - float(epss_percentile)) * 100:.2f}%)"
+            if epss_percentile is not None else ""
+        )
+        fields.append({
+            "title": "EPSS — Exploit Probability",
+            "value": f"{epss_pct}{percentile_text}",
+            "short": True
+        })
+
+    # Commit provenance — only include if it was actually captured
+    provenance = finding.get("introduced_by")
+    if provenance:
+        fields.append({
+            "title": "Introduced By",
+            "value": (
+                f"<{provenance.get('commit_url', '')}|"
+                f"{provenance.get('commit_sha', 'unknown')}> — "
+                f"{provenance.get('author', 'unknown')}"
+            ),
+            "short": False
+        })
+
     return {
         "attachments": [{
             "color":  colour,
@@ -100,22 +183,8 @@ def format_slack_alert(finding: dict) -> dict:
                 f"in {finding['package']}=={finding['version']}"
             ),
             "text":   finding.get("summary", ""),
-            "fields": [
-                {
-                    "title": "Fix",
-                    "value": (
-                        f"`pip install {finding['package']}=="
-                        f"{finding.get('fix_version', 'latest')}`"
-                    ),
-                    "short": True
-                },
-                {
-                    "title": "Detected",
-                    "value": finding.get("detected_at", "Unknown"),
-                    "short": True
-                }
-            ],
-            "footer": "Vuln Alert System | AWS EKS"
+            "fields": fields,
+            "footer": "Vuln Alert System"
         }]
     }
 
